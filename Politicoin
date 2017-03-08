@@ -1,0 +1,91 @@
+pragma solidity ^0.4.0;
+
+contract Politicoin {
+    
+    uint256 public totalSupply;
+    uint256 public costPerVote;
+    
+    string[] public candidates;
+    
+    /* every user is mapped to a balance */
+    mapping (address => uint256) public balanceOf;
+    mapping (address => mapping (address => uint256)) public allowance;
+    mapping (string => uint256) public votes; 
+    
+    /* Initialize contract with some initial supply */
+    function Politicoin(uint256 initialSupply) {
+        balanceOf[msg.sender] = initialSupply;
+        totalSupply = initialSupply;
+        costPerVote = 1;
+    }
+    
+    function totalSupply() constant returns (uint256 totalSupply) {
+        return totalSupply;
+    }
+    
+    function balanceOf(address _owner) constant returns (uint256 balance){
+        return balanceOf[_owner];
+    }
+    
+    function transfer(address receiver, uint256 value) returns (bool success){
+        
+        if (balanceOf[msg.sender] < value) {
+            throw;
+        }
+        balanceOf[msg.sender] = balanceOf[msg.sender] - value;
+        balanceOf[receiver] = balanceOf[receiver] + value;
+        return true;
+    }
+    
+    function TransferFrom(address _from, address _to, uint256 _value) 
+    returns (bool success) {
+        if (balanceOf[_from] < _value) {throw;}
+        if (allowance[_from][_to] < _value) {throw;}
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        allowance[_from][_to] -= _value;
+        return true;
+    }
+    
+    function approve(address _spender, uint256 _value) returns (bool success) {
+        if (balanceOf[msg.sender] < _value) {throw;}
+        allowance[msg.sender][_spender] = _value;
+        return true;
+    }
+    
+    function allowance(address _owner, address _spender) 
+    returns (uint256 money) {
+        money = allowance[_owner][_spender];
+        return money;
+    }
+    
+    function writeIn(string candidate) {
+        candidates.push(candidate);
+    }
+    
+    function vote(string candidate, uint256 _votes) returns (bool success) {
+        if (balanceOf[msg.sender] < (costPerVote*_votes)) {
+            throw;
+        }
+        votes[candidate] += _votes;
+        balanceOf[msg.sender] -= (costPerVote*_votes);
+        return true;
+    }
+    
+    function numVotes(string option) returns (uint256 vote){
+        vote = votes[option];
+        return vote;
+    }
+    
+    function topOption() returns (string winner) {
+        uint256 x = candidates.length;
+        winner = candidates[0];
+        for(uint256 i = 1; i < x; i++) {
+            if (votes[candidates[i]] > votes[winner]) {
+                winner = candidates[i];
+            }
+        }
+        return winner;
+    }
+    
+}
