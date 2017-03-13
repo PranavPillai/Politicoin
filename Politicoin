@@ -59,10 +59,6 @@ contract Politicoin {
         return money;
     }
     
-    function writeIn(string candidate) {
-        candidates.push(candidate);
-    }
-    
     function vote(string candidate, uint256 _votes) returns (bool success) {
         if (balanceOf[msg.sender] < (costPerVote*_votes)) {
             throw;
