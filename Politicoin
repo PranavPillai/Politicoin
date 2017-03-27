@@ -10,13 +10,13 @@ contract Politicoin {
     /* every user is mapped to a balance */
     mapping (address => uint256) public balanceOf;
     mapping (address => mapping (address => uint256)) public allowance;
-    mapping (string => uint256) public votes; 
+    mapping (string => uint256) private votes; 
     
     /* Initialize contract with some initial supply */
-    function Politicoin(uint256 initialSupply) {
+    function Politicoin(uint256 initialSupply, uint _costPerVote) {
         balanceOf[msg.sender] = initialSupply;
         totalSupply = initialSupply;
-        costPerVote = 1;
+        costPerVote = _costPerVote;
     }
     
     function totalSupply() constant returns (uint256 totalSupply) {
@@ -32,12 +32,12 @@ contract Politicoin {
         if (balanceOf[msg.sender] < value) {
             throw;
         }
-        balanceOf[msg.sender] = balanceOf[msg.sender] - value;
-        balanceOf[receiver] = balanceOf[receiver] + value;
+        balanceOf[msg.sender] -= value;
+        balanceOf[receiver] += value;
         return true;
     }
     
-    function TransferFrom(address _from, address _to, uint256 _value) 
+    function transferFrom(address _from, address _to, uint256 _value) 
     returns (bool success) {
         if (balanceOf[_from] < _value) {throw;}
         if (allowance[_from][_to] < _value) {throw;}
@@ -55,8 +55,7 @@ contract Politicoin {
     
     function allowance(address _owner, address _spender) 
     returns (uint256 money) {
-        money = allowance[_owner][_spender];
-        return money;
+        return allowance[_owner][_spender];
     }
     
     function vote(string candidate, uint256 _votes) returns (bool success) {
